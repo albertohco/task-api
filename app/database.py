@@ -1,6 +1,8 @@
+
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, Session
+from typing import Generator
 
 SQLALCHEMY_DATABASE_URL = "sqlite:///./tasks.db"
 
@@ -15,12 +17,12 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 # Criar classe base para os modelos
 Base = declarative_base()
 
-def get_db():
+def get_db() -> Generator[Session, None, None]:
     """
     Provide a SQLAlchemy Session for request handlers and ensure it is closed after use.
     
     Returns:
-        sqlalchemy.orm.Session: An active database session; the session will be closed when the caller's context ends.
+        Generator[Session, None, None]: An active database session; the session will be closed when the caller's context ends.
     """
     db = SessionLocal()
     try:
