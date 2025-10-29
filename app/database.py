@@ -17,8 +17,10 @@ Base = declarative_base()
 
 def get_db():
     """
-    Dependency para injeção do banco de dados.
-    Yield uma sessão do banco e garante que será fechada após o uso.
+    Provide a SQLAlchemy Session for request handlers and ensure it is closed after use.
+    
+    Returns:
+        sqlalchemy.orm.Session: An active database session; the session will be closed when the caller's context ends.
     """
     db = SessionLocal()
     try:
