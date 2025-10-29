@@ -17,20 +17,24 @@ app = FastAPI(
 
 @app.get("/")
 def read_root():
-    """Endpoint raiz que retorna uma mensagem de boas-vindas"""
+    """
+    Provide a welcome message for the API root.
+    
+    Returns:
+        dict: A dictionary with a 'message' key containing the welcome text.
+    """
     return {"message": "Bem-vindo à API de Gerenciamento de Tarefas"}
 
 @app.post("/tasks/", response_model=schemas.TaskResponse, status_code=201, tags=["Tasks"])
 def create_task(task: schemas.TaskCreate, db: Session = Depends(get_db)):
     """
-    Cria uma nova tarefa.
+    Create a new task record in the database.
     
-    Args:
-        task: Dados da tarefa a ser criada
-        db: Sessão do banco de dados
+    Parameters:
+        task (schemas.TaskCreate): Task data to persist.
     
     Returns:
-        A tarefa criada
+        models.Task: The persisted task with database-assigned fields populated.
     """
     db_task = models.Task(**task.model_dump())
     db.add(db_task)
@@ -46,16 +50,15 @@ def list_tasks(
     db: Session = Depends(get_db)
 ):
     """
-    Lista todas as tarefas com paginação e filtro opcional por status.
+    List tasks with pagination and an optional completion filter.
     
-    Args:
-        skip: Número de registros para pular
-        limit: Número máximo de registros para retornar
-        completed: Filtro opcional por status de conclusão
-        db: Sessão do banco de dados
+    Parameters:
+        skip (int): Number of records to skip (offset).
+        limit (int): Maximum number of records to return.
+        completed (Optional[bool]): If provided, filters tasks by their completion status.
     
     Returns:
-        Lista de tarefas
+        List[models.Task]: A list of Task ORM instances matching the query.
     """
     query = db.query(models.Task)
     if completed is not None:
@@ -65,17 +68,16 @@ def list_tasks(
 @app.get("/tasks/{task_id}", response_model=schemas.TaskResponse, tags=["Tasks"])
 def get_task(task_id: int, db: Session = Depends(get_db)):
     """
-    Obtém uma tarefa específica por ID.
+    Retrieve a task by its ID.
     
-    Args:
-        task_id: ID da tarefa
-        db: Sessão do banco de dados
+    Parameters:
+        task_id (int): The ID of the task to retrieve.
     
     Returns:
-        A tarefa solicitada
+        The Task ORM instance matching the given ID.
     
     Raises:
-        HTTPException: Se a tarefa não for encontrada
+        HTTPException: If no task with the given ID exists (status 404).
     """
     task = db.query(models.Task).filter(models.Task.id == task_id).first()
     if task is None:
@@ -85,18 +87,19 @@ def get_task(task_id: int, db: Session = Depends(get_db)):
 @app.put("/tasks/{task_id}", response_model=schemas.TaskResponse, tags=["Tasks"])
 def update_task(task_id: int, task_update: schemas.TaskUpdate, db: Session = Depends(get_db)):
     """
-    Atualiza uma tarefa existente.
+    Update fields of an existing task.
     
-    Args:
-        task_id: ID da tarefa
-        task_update: Dados da tarefa a serem atualizados
-        db: Sessão do banco de dados
+    Only the fields provided in `task_update` are applied to the stored task; other fields remain unchanged.
+    
+    Parameters:
+        task_id (int): ID of the task to update.
+        task_update (schemas.TaskUpdate): Partial update payload; only set fields will be written to the database.
     
     Returns:
-        A tarefa atualizada
+        models.Task: The updated task instance as persisted in the database.
     
     Raises:
-        HTTPException: Se a tarefa não for encontrada
+        HTTPException: If no task with `task_id` exists (status code 404).
     """
     db_task = db.query(models.Task).filter(models.Task.id == task_id).first()
     if db_task is None:
@@ -113,14 +116,13 @@ def update_task(task_id: int, task_update: schemas.TaskUpdate, db: Session = Dep
 @app.delete("/tasks/{task_id}", status_code=204, tags=["Tasks"])
 def delete_task(task_id: int, db: Session = Depends(get_db)):
     """
-    Remove uma tarefa.
+    Delete a task by its ID.
     
-    Args:
-        task_id: ID da tarefa
-        db: Sessão do banco de dados
+    Parameters:
+        task_id (int): ID of the task to delete.
     
     Raises:
-        HTTPException: Se a tarefa não for encontrada
+        HTTPException: If no task with the given ID exists (HTTP 404).
     """
     task = db.query(models.Task).filter(models.Task.id == task_id).first()
     if task is None:
