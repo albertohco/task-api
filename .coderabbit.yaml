@@ -1,0 +1,57 @@
+language: "pt"
+
+reviews:
+  high_level_summary: true
+  poem: false
+  auto_review:
+    enabled: true
+    ignore_title_keywords:
+      - "WIP"
+      - "NO-REVIEW"
+
+path_filters:
+  - "!venv/**"
+  - "!**/__pycache__/**"
+  - "!*.db"
+  - "!.env"
+
+path_instructions:
+  - path: "app/models.py"
+    instructions: |
+      Este arquivo contém os modelos SQLAlchemy.
+      Verifique:
+      - Tipos corretos nos campos
+      - Relacionamentos bem definidos
+      - Índices apropriados
+      - Constraints de validação
+
+  - path: "app/schemas.py"
+    instructions: |
+      Este arquivo contém os schemas Pydantic.
+      Verifique:
+      - Validações de campos
+      - Tipos corretos
+      - Campos obrigatórios vs opcionais
+      - Consistência com os modelos
+
+  - path: "app/main.py"
+    instructions: |
+      Este arquivo contém as rotas da API.
+      Verifique:
+      - Documentação das rotas
+      - Status codes corretos
+      - Tratamento de erros
+      - Uso correto das dependências
+      - Performance das queries
+
+style:
+  - pattern: 'print\('
+    message: "Evite usar print() em código de produção. Use um logger adequado."
+
+  - pattern: "TODO|FIXME"
+    message: "Resolva todos os TODOs antes do merge."
+
+commit:
+  title:
+    pattern: '^(feat|fix|docs|style|refactor|test|chore)(\(.*\))?: .*'
+    message: "Título do commit deve seguir o padrão do Conventional Commits"
